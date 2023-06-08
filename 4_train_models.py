@@ -6,6 +6,7 @@ import dill
 import pandas as pd
 import numpy as np
 import cdsw
+import mlflow
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -19,6 +20,9 @@ from sklearn.compose import ColumnTransformer
 from lime.lime_tabular import LimeTabularExplainer
 
 from churnexplainer import ExplainedModel,CategoricalEncoder
+
+mlflow.set_experiment("Telco Churn Experiments")
+mlflow.start_run()
 
 data_dir = '/home/cdsw' 
 
@@ -138,7 +142,8 @@ explainedmodel.save()
 
 
 # If running as as experiment, this will track the metrics and add the model trained in this training run to the experiment history.
-cdsw.track_metric("train_score",round(train_score,2))
-cdsw.track_metric("test_score",round(test_score,2))
-cdsw.track_metric("model_path",explainedmodel.model_path)
-cdsw.track_file(explainedmodel.model_path)
+mlflow.log_metric("train_score", round(train_score,2))
+mlflow.log_metric("test_score", round(test_score,2))
+
+mlflow.sklearn.log_model(explainedmodel, "explainedmodel")
+mlflow.end_run()
